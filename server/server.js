@@ -1,3 +1,5 @@
+const {ObjectID} = require("mongodb");
+
 var express = require("express");
 var bodyParser = require("body-parser");
 
@@ -28,6 +30,26 @@ app.get("/todos", (req, res) => {
   }, (e) => {
     res.status(400).send(e);
   });
+});
+
+// GET /todos/some id
+app.get("/todos/:id", (req,res) => {
+  var id = req.params.id;
+  // validate id using isValid
+    // 404 = not found, send back empty send
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+  // findbyId
+    // success - send it back
+    // if not found, send 404 with emtpy body
+    // error - send back 400
+  Todo.findById(id).then((todo) => {
+    if (!todo) {
+      return res.status(404).send();
+    }
+    res.send({todo});
+  }).catch((e) => res.status(400).send());
 });
 
 app.listen(3000, () => {
