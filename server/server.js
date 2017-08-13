@@ -14,6 +14,7 @@ var app = express();
 
 app.use(bodyParser.json());
 
+
 // resource creation
 app.post("/todos", (req, res) => {
   var todo = new Todo({
@@ -97,6 +98,28 @@ app.patch("/todos/:id", (req, res) => {
 
     res.send({todo});
   }).catch((e) => res.status(400).send());
+});
+
+// pick email and password
+app.post("/users", (req, res) => {
+  var body = _.pick(req.body, ["email", "password"]);
+  var user = new User({
+    email: body.email,
+    password: body.password
+  });
+  //var user = new User({body}); is the same as above
+
+
+  user.save().then(() => {
+    return user.generateAuthToken();
+    // res.send(user);
+    // here's the chained promise
+  }).then((token) => {
+    // x- signifies a custom header (one that http does not know by default)
+    res.header("x-auth", token).send(user);
+  }).catch((e) =>  {
+    res.status(400).send(e);
+  });
 });
 
 app.listen(port, () => {
