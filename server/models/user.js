@@ -45,6 +45,7 @@ UserSchema.methods.toJSON = function () {
   return _.pick(userObject, ["_id", "email"]);
 };
 
+// methods creates an instance method
 UserSchema.methods.generateAuthToken = function () {
   // use a regular function rather than an arrow function
   // because arrow functions to not bind to the "this" keyword
@@ -65,6 +66,24 @@ UserSchema.methods.generateAuthToken = function () {
   // });
   return user.save().then(() => {
     return token;
+  });
+};
+
+// statics creates a model method
+UserSchema.statics.findByToken = function (token) {
+  var User = this;
+  var decoded;
+
+  try {
+    decoded = jwt.verify(token, "abc123");
+  } catch (e) {
+    return Promise.reject();
+  }
+
+  return User.findOne({
+    "_id": decoded._id,
+    "tokens.token": token,
+    "tokens.access": "auth"
   });
 };
 

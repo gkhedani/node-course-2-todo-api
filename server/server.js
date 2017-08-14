@@ -9,6 +9,7 @@ const bodyParser = require("body-parser");
 var {mongoose} = require("./db/mongoose");
 var {Todo} = require("./models/todo");
 var {User} = require("./models/user");
+var {authenticate} = require("./middleware/authenticate");
 
 var app = express();
 
@@ -120,6 +121,25 @@ app.post("/users", (req, res) => {
   }).catch((e) =>  {
     res.status(400).send(e);
   });
+});
+
+
+// by modifying the req object, we can reference the function directly
+app.get("/users/me", authenticate, (req, res) => {
+  // now with the middleware, and the modified req object
+  res.send(req.user);
+  // var token = req.header("x-auth");
+  //
+  // User.findByToken(token).then((user) => {
+  //   if (!user) {
+  //     // this will make it drop to the catch
+  //     return Promise.reject();
+  //   }
+  //
+  //   res.send(user);
+  // }).catch((e) => {
+  //   res.status(401).send();
+  // });
 });
 
 app.listen(port, () => {
